@@ -1,0 +1,104 @@
+/**
+  ******************************************************************************
+  * @file    LED control 
+  * @author  Pradnil S Kamble
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+#include "stm32f4xx.h"
+#include "stm32f4_discovery.h"
+			
+GPIO_InitTypeDef  GPIO_InitLed;
+uint16_t ch;
+
+void Delay (__IO uint32_t nCount){
+		while (nCount--){
+		} 
+GPIO_InitTypeDef  GPIO_InitUsart;
+USART_InitTypeDef USART_Receive;
+NVIC_InitTypeDef NVIC_InitUsart;
+
+		}
+
+int main(void)
+{
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+
+	GPIO_InitLed.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3 ;
+	GPIO_InitLed.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitLed.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitLed.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitLed.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOD, &GPIO_InitLed);
+
+    GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_USART3);
+
+    GPIO_InitUsart.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitUsart.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitUsart.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitUsart.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitUsart.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOD, &GPIO_InitUsart);
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+
+    NVIC_InitUsart.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitUsart.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitUsart.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitUsart.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitUsart);
+
+    USART_Receive.USART_BaudRate = 9600;
+    USART_Receive.USART_WordLength = USART_WordLength_8b;
+    USART_Receive.USART_StopBits = USART_StopBits_1;
+    USART_Receive.USART_Parity = USART_Parity_No;
+    USART_Receive.USART_Mode = USART_Mode_Rx;
+    USART_Receive.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_Init(USART3, &USART_Receive);
+
+    USART_ITConfig(USART3,USART_IT_RXNE, ENABLE);
+
+
+    USART_Cmd(USART3, ENABLE);
+
+	while (1) {
+
+	}
+}
+
+void USART3_IRQHandler(void)
+{
+	if(USART_GetITStatus(USART3, USART_IT_RXNE)!= RESET)
+	{
+		ch = USART_ReceiveData(USART3);
+
+	 if (ch == 'R')
+	 {
+		 GPIO_WriteBit(GPIOD, GPIO_Pin_0, Bit_SET);
+		 Delay(16800000);
+		 GPIO_WriteBit(GPIOD, GPIO_Pin_0, Bit_RESET);
+
+	 }
+	 else if (ch == 'B')
+	 {
+		 GPIO_WriteBit(GPIOD, GPIO_Pin_1, Bit_SET);
+		 Delay(16800000);
+		 GPIO_WriteBit(GPIOD, GPIO_Pin_1, Bit_RESET);
+	 }
+	 else if (ch == 'Y')
+		 {
+			 GPIO_WriteBit(GPIOD, GPIO_Pin_2, Bit_SET);
+			 Delay(16800000);
+			 GPIO_WriteBit(GPIOD, GPIO_Pin_2, Bit_RESET);
+		 }
+	 else
+	 	 {
+	 			 GPIO_WriteBit(GPIOD, GPIO_Pin_3, Bit_SET);
+	 			 Delay(16800000);
+	 			 GPIO_WriteBit(GPIOD, GPIO_Pin_3, Bit_RESET);
+	 	 }
+	             USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+       }
+}
